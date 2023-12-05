@@ -1,7 +1,9 @@
 package TicTacToeChat;
 
+import java.awt.*;
 import java.io.*;
 import java.net.*;
+import java.time.chrono.IsoChronology;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -9,10 +11,10 @@ public class TicServer {
 
     private static final int PORT = 17777;
     private static final char[] board = new char[9];
-    private static boolean isPlayerTurn = true;
+    private static boolean PlayerTurn = true;
 
     public static void main(String[] args) {
-        Arrays.fill(board, ' ');
+        Arrays.fill(board, '-');
 
         try (ServerSocket serverSocket = new ServerSocket(PORT)) {
             System.out.println("Server started. Waiting for a connection...");
@@ -24,8 +26,10 @@ public class TicServer {
                 System.out.println("Client connected: " + clientSocket.getInetAddress() + ":" + clientSocket.getPort());
 
                 String clientInput;
-                while ((clientInput = in.readLine()) != null) {
+                while (!clientSocket.isClosed()) {
+                    clientInput = in.readLine();
                     if (clientInput.equalsIgnoreCase("exit")) {
+                        clientSocket.close();
                         break;
                     }
 
@@ -38,15 +42,19 @@ public class TicServer {
                         out.println("Game Over: Draw!");
                         break;
                     }
-                    while (!isPlayerTurn){
+                    while (!PlayerTurn){
                         int randomNum = ThreadLocalRandom.current().nextInt(0, 9 + 1);
-                        if (board[randomNum] == ' '){
+                        if (board[randomNum] == '-'){
                             board[randomNum] = 'O';
+                            PlayerTurn = true;
                             break;
                         }
                     }
-                    System.out.println(getBoardString());
-                    out.println("Current Board: " + getBoardString());
+                    out.println(getBoardString());
+                    for (int i = 0; i < 3; i++) {
+                        String part = getBoardString().substring(i * 3, (i + 1) * 3);
+                        System.out.println(part);
+                    }
                 }
             }
         } catch (IOException e) {
@@ -57,13 +65,13 @@ public class TicServer {
     private static void processMove(String move, PrintWriter out) {
         // Process the move from client
         // Assuming the client sends moves in "row col" format
-        while (isPlayerTurn) {
+        while (PlayerTurn) {
             try {
                 int index = Integer.parseInt(move);
 
-                if (board[index] == ' ') {
+                if (board[index] == '-') {
                     board[index] = 'X';
-                    isPlayerTurn = !isPlayerTurn;
+                    PlayerTurn = false;
                 } else {
                     out.println("Invalid move, try again.");
                 }
@@ -89,7 +97,7 @@ public class TicServer {
 
     private static boolean isBoardFull() {
         for (char c : board) {
-            if (c == ' ') {
+            if (c == '-') {
                 return false;
             }
         }

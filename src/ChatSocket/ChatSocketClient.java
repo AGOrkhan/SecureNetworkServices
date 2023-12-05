@@ -1,15 +1,15 @@
-package TicTacToeChat;
+package ChatSocket;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
 
-public class TicClient {
+public class ChatSocketClient {
 
     private static final int PORT = 17777;
     private static final String hostName = "127.0.0.1";
 
     public static void main(String[] args) {
+
         System.out.println("Connecting to " + hostName);
 
         try (Socket socket = new Socket(hostName, PORT);
@@ -22,22 +22,20 @@ public class TicClient {
             String response;
 
             while (!socket.isClosed()) {
-                System.out.println("Enter your move (1 -9) or type 'exit' to quit:");
+                System.out.println("Enter a message or type 'exit' to quit:");
                 message = userInput.readLine();
                 out.println(message);
 
                 if (message.equalsIgnoreCase("exit")) {
                     break;
                 }
-
                 response = in.readLine();
-                for (int i = 0; i < 3; i++) {
-                    String part = response.substring(i * 3, (i + 1) * 3);
-                    System.out.println(part);
-                }
+                System.out.println(response);
+
             }
         } catch (IOException e) {
             System.err.println("An error occurred: " + e.getMessage());
         }
     }
 }
+
