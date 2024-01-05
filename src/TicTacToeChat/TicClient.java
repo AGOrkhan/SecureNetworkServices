@@ -2,7 +2,8 @@ package TicTacToeChat;
 
 import java.io.*;
 import java.net.*;
-import java.util.Scanner;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.SSLSocket;
 
 public class TicClient {
 
@@ -10,34 +11,59 @@ public class TicClient {
     private static final String hostName = "127.0.0.1";
 
     public static void main(String[] args) {
-        System.out.println("Connecting to " + hostName);
+        System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\upper\\IdeaProjects\\SecureNetworkServices\\src\\TicTacToeChat\\clienttruststore.jks");
+        System.setProperty("javax.net.ssl.trustStorePassword", "khan321");
 
-        try (Socket socket = new Socket(hostName, PORT);
+        SSLSocketFactory ssf = (SSLSocketFactory) SSLSocketFactory.getDefault();
+
+        try (SSLSocket socket = (SSLSocket) ssf.createSocket(hostName, PORT);
              PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
              BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
              BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in))) {
 
-            // socket.setSoTimeout(2000);
-            String message;
-            String response;
+            System.out.println("Connected to SSL server at " + hostName + ":" + PORT);
 
-            while (!socket.isClosed()) {
-                System.out.println("Enter your move (1 -9) or type 'exit' to quit:");
-                message = userInput.readLine();
-                out.println(message);
+            String fromServer;
 
-                if (message.equalsIgnoreCase("exit")) {
+            while (true) {
+                fromServer = in.readLine();
+                if (fromServer == null) {
                     break;
                 }
 
-                response = in.readLine();
-                for (int i = 0; i < 3; i++) {
-                    String part = response.substring(i * 3, (i + 1) * 3);
-                    System.out.println(part);
+                if (fromServer.contains(",")) {
+                    printBoard(fromServer);
+                } else {
+                    System.out.println(fromServer);
+                }
+
+                if (fromServer.equalsIgnoreCase("You win!") ||
+                        fromServer.equalsIgnoreCase("Server wins!") ||
+                        fromServer.equalsIgnoreCase("It's a tie!")) {
+                    break;
+                }
+
+                System.out.print("Enter your move (1-9): ");
+                String fromUser = userInput.readLine();
+                out.println(fromUser);
+
+                if (fromUser.equalsIgnoreCase("exit")) {
+                    break;
                 }
             }
         } catch (IOException e) {
             System.err.println("An error occurred: " + e.getMessage());
+        }
+    }
+    private static void printBoard(String boardString) {
+        String[] cells = boardString.split(",");
+        for (int i = 0; i < cells.length; i++) {
+            System.out.print(cells[i]);
+            if ((i + 1) % 3 == 0) {
+                System.out.println();
+            } else {
+                System.out.print(",");
+            }
         }
     }
 }
