@@ -11,8 +11,8 @@ public class TicClient {
     private static final String hostName = "127.0.0.1";
 
     public static void main(String[] args) {
-        System.setProperty("javax.net.ssl.trustStore", "C:\\Users\\upper\\IdeaProjects\\SecureNetworkServices\\src\\TicTacToeChat\\clienttruststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "khan321");
+        System.setProperty("javax.net.ssl.trustStore", "");
+        System.setProperty("javax.net.ssl.trustStorePassword", "");
 
         SSLSocketFactory ssf = (SSLSocketFactory) SSLSocketFactory.getDefault();
 
